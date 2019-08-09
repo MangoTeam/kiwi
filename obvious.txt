@@ -1,0 +1,4 @@
+- Display variables, expressions, and constraints on the page
+- Finish implementing a cassowary example
+  - currently you can adjust a.left such that it breaks out of the parent. stop that
+- direct manipulation of the attributes of the boxes and parent
