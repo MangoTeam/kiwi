@@ -1,28 +1,38 @@
-$: cassowaryProblem2 = (() => {
-  // Create a solver
+import * as kiwi from 'kiwi.js';
+
+function cassowary2({ "p.left": pLeftValue
+                    , "p.right": pRightValue
+                    , "p.width": pWidthValue
+                    , "a.left": aLeftValue
+                    , "a.right": aRightValue
+                    , "a.width": aWidthValue
+                    , "b.left": bLeftValue
+                    , "b.right": bRightValue
+                    , "b.width": bWidthValue
+                   }) {
   let solver = new kiwi.Solver();
-  
+
   // Create and add some editable rectangles
   // Parent
-  var pLeft = new kiwi.Variable({ value: 0 });
-  var pRight = new kiwi.Variable({ value: 800 });
-  var pWidth = new kiwi.Variable({ value: 800 });
+  var pLeft = new kiwi.Variable("p.left");
+  var pRight = new kiwi.Variable("p.right");
+  var pWidth = new kiwi.Variable("p.width");
   solver.addEditVariable(pLeft, kiwi.Strength.strong);
   solver.addEditVariable(pRight, kiwi.Strength.strong);
   solver.addEditVariable(pWidth, kiwi.Strength.strong);
 
   // Child A
-  var aLeft = new kiwi.Variable({ value: 100 });
-  var aRight = new kiwi.Variable({ value: 300 });
-  var aWidth = new kiwi.Variable({ value: 200 });
+  var aLeft = new kiwi.Variable("a.left");
+  var aRight = new kiwi.Variable("a.right");
+  var aWidth = new kiwi.Variable("a.width");
   solver.addEditVariable(aLeft, kiwi.Strength.strong);
   solver.addEditVariable(aRight, kiwi.Strength.strong);
   solver.addEditVariable(aWidth, kiwi.Strength.strong);
 
   // Child B
-  var bLeft = new kiwi.Variable({ value: 400 });
-  var bRight = new kiwi.Variable({ value: 700 });
-  var bWidth = new kiwi.Variable({ value: 300 });
+  var bLeft = new kiwi.Variable("b.left");
+  var bRight = new kiwi.Variable("b.right");
+  var bWidth = new kiwi.Variable("b.width");
   solver.addEditVariable(bLeft, kiwi.Strength.strong);
   solver.addEditVariable(bRight, kiwi.Strength.strong);
   solver.addEditVariable(bWidth, kiwi.Strength.strong);
@@ -43,20 +53,13 @@ $: cassowaryProblem2 = (() => {
   // Lets solve the problem!
   solver.updateVariables();
 
-  console.log(" "); 
-  console.log("Variable Values"); 
-  console.log(" "); 
-  console.log("pLeft "+pLeft.value().toString()); 
-  console.log("pRight "+pRight.value().toString());
-  console.log("pWidth "+pWidth.value().toString());
+  // const variables = solver._varMap.array.map(v => v.first);
 
-  console.log("aLeft "+aLeft.value().toString());
-  console.log("aRight "+aRight.value().toString());
-  console.log("aWidth "+aWidth.value().toString());
-
-  console.log("bLeft "+bLeft.value().toString());
-  console.log("bRight "+bRight.value().toString());
-  console.log("bWidth "+bWidth.value().toString());
+  // console.log("Variable Values"); 
+  // variables.forEach(v => {
+  //   console.log("");
+  //   console.log(`${v._name} ${v._value}`);
+  // })
 
   // Create a variable calculated through a constraint
 
@@ -100,6 +103,9 @@ $: cassowaryProblem2 = (() => {
   var bWidthLE = new kiwi.Expression([-1, bWidth], 30);
   solver.addConstraint(new kiwi.Constraint(bWidthLE, kiwi.Operator.Le, kiwi.Strength.required));
     
-   
-  return solver
-})();
+    
+  // solver.updateVariables();
+  return solver;
+}
+
+  export {cassowary2}; 
