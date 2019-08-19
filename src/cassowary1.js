@@ -53,7 +53,7 @@ function cassowary1A(boxes)  {
   });
 
   const varByName = kiwiVars.reduce((acc, val) => {
-    acc[val.name] = val;
+    acc[val.name()] = val;
   }, {});
 
   const varsWithValues = kiwiVars.filter(v => v.value());
