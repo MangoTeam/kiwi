@@ -12,7 +12,10 @@ export default {
 		sourcemap: true,
 		format: 'iife',
 		name: 'app',
-		file: 'public/bundle.js'
+		file: 'public/bundle.js',
+		globals: {
+			// 'lodash': '_'
+		}
 	},
 	plugins: [
 		svelte({

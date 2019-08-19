@@ -1,19 +1,13 @@
 <script>
 import * as kiwi from 'kiwi.js';
-import {cassowary1} from './cassowary1.js';
+// import _ from 'lodash';
+import keys from 'lodash/keys'
+import {cassowary1A} from './cassowary1.js';
 import {cassowary2} from './cassowary2.js';
+
+import RectangleDrawer from './RectangleDrawer.svelte';
+
 export let name;
-
-
-let pWidthValue = 800;
-
-let aLeftValue = 100;
-let aRightValue = 100;
-let aWidthValue = 200;
- 
-let bLeftValue = 400;
-let bRightValue = 700;
-let bWidthValue = 300;
 
 // let problemValues = {
 //   "a.left":  100,
@@ -24,25 +18,40 @@ let bWidthValue = 300;
 //   "b.width": 300,
 //   "p.width": 800,
 // };
+let problemValues = [
+  { name: "a"
+  , left: 100
+  , right: 300
+  , width: 200
+  },
+  { name: "b"
+  , left: 400
+  , right: 700
+  , width: 300
+  },
+  { name: "p"
+  , width: 800
+  }
+];
 
-// $: cassowaryProblem = cassowary1(problemValues["a.left"]
-//                                 ,problemValues["a.width"]
-//                                 ,problemValues["p.width"]
-//                                 ,problemValues["b.right"]) 
+$: solver = cassowary1A(problemValues["a.left"]
+                                ,problemValues["a.width"]
+                                ,problemValues["p.width"]
+                                ,problemValues["b.right"]) 
 
-let problemValues = {
-  "p.left": 0,
-  "p.right": 800,
-  "p.width": 800,
-  "a.left": 100,
-  "a.right": 300,
-  "a.width": 200,
-  "b.left": 400,
-  "b.right": 700,
-  "b.width": 300
-}
+// let problemValues = {
+//   "p.left": 0,
+//   "p.right": 800,
+//   "p.width": 800,
+//   "a.left": 100,
+//   "a.right": 300, 
+//   "a.width": 200,
+//   "b.left": 400,
+//   "b.right": 700,
+//   "b.width": 300
+// }
 
-$: solver = cassowary2(problemValues);
+// $: solver = cassowary2(problemValues);
 
 // Solve the constraints
 let cassowaryVars = [];
@@ -53,10 +62,16 @@ function updateVariables() {
    return {name: v.name(), value: v.value()};
 
   })
-  problemValues = cassowaryVars.reduce((acc, {name, value}) => {
-    acc[name] = +value;
+  const boxes = cassowaryVars.reduce((acc, {name, value}) => {
+    [name, attr] = name.split(".");
+    if (!acc[name]) acc[name] = {};
+    acc[name][attr] = +value;
     return acc;
-  }, {});
+  }, {}); 
+
+  problemValues = keys(boxes).map(name => {
+    return Object.assign({name}, boxes[name]);
+  });
 }
 </script>
 
@@ -93,6 +108,8 @@ function updateVariables() {
 </style>
 
 <div>
+  <RectangleDrawer />
+
   <h1>Hello {name}!</h1>
   <label>a.left: {problemValues["a.left"]}</label>
   <input type="range" min="100" max="800" step="10" 

@@ -1,4 +1,12 @@
+- How do we recognize when cassowary has made a decision w.r.t. constraints? e.g. breaking a constraint
+- draw a rectangle and print out its left, right, top, bottom, width, and height
+
 - Display variables, expressions, and constraints on the page
-- Finish implementing a cassowary example
-  - currently you can adjust a.left such that it breaks out of the parent. stop that
+- Create and remove boxes dynamically
 - direct manipulation of the attributes of the boxes and parent
+
+
+- add the "physics" constraints to cassowary
+  all variables must be positive
+  right - left = width <- required
+  bottom - top = height <- required
