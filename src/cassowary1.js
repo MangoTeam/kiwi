@@ -1,5 +1,6 @@
 import * as kiwi from 'kiwi.js';
 import flatMap from 'lodash/flatMap';
+import toPairs from 'lodash/toPairs';
 
 function cassowary1(aLeftValue, aWidthValue, pWidthValue, bRightValue)  {
   // Create a solver
@@ -39,27 +40,35 @@ function cassowary1(aLeftValue, aWidthValue, pWidthValue, bRightValue)  {
 }
 
 function cassowary1A(boxes)  {
+  // maps `${boxName}.${attr}` to numbers
+  const boxesDictionary = boxes.reduce((acc, box) => {
+    const attrs = ['left', 'top', 'right', 'bottom', 'width', 'height'];
+    attrs.forEach(a => acc[`${box.name}.${a}`] = box[a]);
+    return acc;
+  }, {});
   // Create a solver
   let solver = new kiwi.Solver();
 
   const kiwiVars = flatMap(boxes, (b) => {
     const attrs = ['left', 'top', 'right', 'bottom', 'width', 'height'];
     const vars = attrs.map(a => 
-      new kiwi.Variable({ name: `${b.name}.left`
-                        , value: b[a]
+      new kiwi.Variable({ name: `${b.name}.${a}`
+                        // , value: b[a] || 0
                         })
     );
     return vars;
   });
 
+  // key is boxName.attr: value is a number
   const varByName = kiwiVars.reduce((acc, val) => {
-    acc[val.name()] = val;
+    acc[val.name().name] = val;
+    return acc;
   }, {});
 
-  const varsWithValues = kiwiVars.filter(v => v.value());
+  const varsWithValues = kiwiVars.filter(kiwiVar => boxesDictionary[kiwiVar.name().name]);
   varsWithValues.forEach(v => {
     solver.addEditVariable(v, kiwi.Strength.strong);
-    solver.suggestValue(v, v.value());
+    solver.suggestValue(v, boxesDictionary[v.name().name]);
   });
 
   const aRight = varByName["a.right"];
@@ -68,15 +77,17 @@ function cassowary1A(boxes)  {
   const bWidth = varByName["b.width"];
   const bRight = varByName["b.right"];
   const pWidth = varByName["p.width"];
-  // let aRightExpr = new kiwi.Expression([-1, aRight], aLeft, aWidth);
-  // let bLeftExpr  = aLeft.plus(aWidth).plus(100).minus(bLeft);
-  // let bRightExpr = aRight.plus(100).plus(bWidth).minus(pWidth);
-  // let containmentExpr = pWidth.minus(bRight);
+  const bLeft  = varByName["b.left"]
+
+  let aRightExpr = new kiwi.Expression([-1, aRight], aLeft, aWidth);
+  let bLeftExpr  = aLeft.plus(aWidth).plus(100).minus(bLeft);
+  let bRightExpr = aRight.plus(100).plus(bWidth).minus(pWidth);
+  let containmentExpr = pWidth.minus(bRight);
   
-  // solver.addConstraint(new kiwi.Constraint(aRightExpr, kiwi.Operator.Eq));
-  // solver.addConstraint(new kiwi.Constraint(bLeftExpr, kiwi.Operator.Eq));
-  // solver.addConstraint(new kiwi.Constraint(bRightExpr, kiwi.Operator.Eq));
-  // solver.addConstraint(new kiwi.Constraint(containmentExpr, kiwi.Operator.Eq));
+  solver.addConstraint(new kiwi.Constraint(aRightExpr, kiwi.Operator.Eq));
+  solver.addConstraint(new kiwi.Constraint(bLeftExpr, kiwi.Strength.required));
+  solver.addConstraint(new kiwi.Constraint(bRightExpr, kiwi.Operator.Eq));
+  solver.addConstraint(new kiwi.Constraint(containmentExpr, kiwi.Operator.Eq));
 
   return solver;
 }

@@ -7,38 +7,6 @@ import {cassowary2} from './cassowary2.js';
 
 import RectangleDrawer from './RectangleDrawer.svelte';
 
-export let name;
-
-// let problemValues = {
-//   "a.left":  100,
-//   "a.right": 300,
-//   "a.width": 200,
-//   "b.left":  400,
-//   "b.right": 700,
-//   "b.width": 300,
-//   "p.width": 800,
-// };
-let problemValues = [
-  { name: "a"
-  , left: 100
-  , right: 300
-  , width: 200
-  },
-  { name: "b"
-  , left: 400
-  , right: 700
-  , width: 300
-  },
-  { name: "p"
-  , width: 800
-  }
-];
-
-$: solver = cassowary1A(problemValues["a.left"]
-                                ,problemValues["a.width"]
-                                ,problemValues["p.width"]
-                                ,problemValues["b.right"]) 
-
 // let problemValues = {
 //   "p.left": 0,
 //   "p.right": 800,
@@ -53,25 +21,61 @@ $: solver = cassowary1A(problemValues["a.left"]
 
 // $: solver = cassowary2(problemValues);
 
+let problemValues = [
+  { name: "a"
+  , left: 100
+  , right: undefined
+  , width: 200
+  , height: undefined
+  , top: undefined
+  , bottom: undefined
+  },
+  { name: "b"
+  , left: undefined
+  , right: 800
+  , width: undefined
+  , height: undefined
+  , top: undefined
+  , bottom: undefined
+  },
+  { name: "p"
+  , left: undefined
+  , right: undefined
+  , width: 800
+  , height: undefined
+  , top: undefined
+  , bottom: undefined
+  }
+];
+
+$: boxesDictionary = problemValues.reduce((acc, box) => {
+  const attrs = ['left', 'top', 'right', 'bottom', 'width', 'height'];
+  attrs.forEach(a => acc[`${box.name}.${a}`] = box[a]);
+  return acc;
+}, {});
+
+$: solver = cassowary1A(problemValues) 
+
 // Solve the constraints
 let cassowaryVars = [];
 function updateVariables() {
   solver.updateVariables();
   // after calling updateVariables, can go in, scrape all variables and post their values
   cassowaryVars = solver._varMap.array.map(({first: v}) => {
-   return {name: v.name(), value: v.value()};
+   return {varName: v.name().name, value: v._value};
 
   })
-  const boxes = cassowaryVars.reduce((acc, {name, value}) => {
-    [name, attr] = name.split(".");
-    if (!acc[name]) acc[name] = {};
-    acc[name][attr] = +value;
+  const boxes = cassowaryVars.reduce((acc, {varName, value}) => {
+    let [boxName, attr] = varName.split(".");
+    if (!acc[boxName]) acc[boxName] = {};
+    acc[boxName][attr] = +value;
     return acc;
   }, {}); 
 
-  problemValues = keys(boxes).map(name => {
-    return Object.assign({name}, boxes[name]);
+  problemValues = problemValues.map(box => {
+    return Object.assign(box, boxes[box.name]);
   });
+  console.log("foo");
 }
 </script>
 
@@ -105,32 +109,68 @@ function updateVariables() {
   #b {
     height: 100px;
   }
+
+  .boxes {
+    display: flex;
+    flex-flow: row nowrap;
+  }
+
+  .box-control {
+    padding: 15px;
+  }
 </style>
 
 <div>
-  <RectangleDrawer />
-
-  <h1>Hello {name}!</h1>
-  <label>a.left: {problemValues["a.left"]}</label>
+  <div class="boxes">
+    {#each problemValues as {name, left, right, top, bottom, height, width}, i}
+      <div class="box-control">
+        <label>{name}.left: {left}</label>
+        <input type="range" min="100" max="800" step="10" 
+              bind:value={problemValues[i]["left"]} 
+              on:input={updateVariables}> 
+        <label>{name}.right: {right}</label>
+        <input type="range" min="100" max="800" step="10" 
+              bind:value={problemValues[i]["right"]} 
+              on:input={updateVariables}> 
+        <label>{name}.top: {top}</label>
+        <input type="range" min="100" max="800" step="10" 
+              bind:value={problemValues[i]["top"]} 
+              on:input={updateVariables}> 
+        <label>{name}.bottom: {bottom}</label>
+        <input type="range" min="100" max="800" step="10" 
+              bind:value={problemValues[i]["bottom"]} 
+              on:input={updateVariables}> 
+        <label>{name}.width: {width}</label>
+        <input type="range" min="100" max="800" step="10" 
+              bind:value={problemValues[i]["width"]} 
+              on:input={updateVariables}> 
+        <label>{name}.height: {height}</label>
+        <input type="range" min="100" max="800" step="10" 
+              bind:value={problemValues[i]["height"]} 
+              on:input={updateVariables}> 
+      </div>
+    {/each}
+  </div>
+  <!-- <label>a.left: {boxesDictionary["a.left"]}</label>
   <input type="range" min="100" max="800" step="10" 
-         bind:value={problemValues["a.left"]} 
+         bind:value={boxesDictionary["a.left"]} 
          on:input={updateVariables}>
-  <label>a.width: {problemValues["a.width"]}</label>
+  <label>a.width: {boxesDictionary["a.width"]}</label>
   <input type="range" min="100" max="800" step="10" 
-         bind:value={problemValues["a.width"]}
+         bind:value={boxesDictionary["a.width"]}
          on:input="{updateVariables}">
 
-  <p>a.right: {problemValues["a.right"]}</p>
-  <p>b.left: {problemValues["b.left"]}</p>
-  <p>b.width: {problemValues["b.width"]}</p>
-  <button on:click={updateVariables}>Solve</button>
+  <p>a.right: {boxesDictionary["a.right"]}</p>
+  <p>b.left: {boxesDictionary["b.left"]}</p>
+  <p>b.width: {boxesDictionary["b.width"]}</p>
+  <button on:click={updateVariables}>Solve</button> -->
 
   <div id="canvas">
     <div id="parent" class="box">
       <div id="a" class="box"
-          style="left: {problemValues["a.left"]}px; width: {problemValues["a.width"]}px"></div>
+          style="left: {boxesDictionary["a.left"]}px; width: {boxesDictionary["a.width"]}px"></div>
       <div id="b" class="box"
-          style="left: {problemValues["b.left"]}px; width: {problemValues["b.width"]}px"></div>
+          style="left: {boxesDictionary["b.left"]}px; width: {boxesDictionary["b.width"]}px"></div>
     </div>
   </div>
 </div>
